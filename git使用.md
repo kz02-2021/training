@@ -1,8 +1,15 @@
 # git使用
 
+## 仓库
+
+1. git取消init
+
+   ` Rm -rf .git `
+
+
 ## 提交
 
-`git pull -u origin main`即保存远程链接，下一次直接`git push`就行了
+1. `git pull -u origin main`即保存远程链接，下一次直接`git push`就行了
 
 ## 版本回滚
 
@@ -16,7 +23,7 @@
 2. 撤销修改（已经add）
 
    ```
-   git rm --cached .
+   git rm --cached . -r
    ```
 
 3. 撤销修改（没有add）
@@ -38,5 +45,6 @@ git reset --hard 55c49efab26d6a5c657d87e05b85……
 回滚到指定版本
 ```
 
+# 问题
 
-
+1. 怎么在已经有所有代码的文件中连接上指定git
