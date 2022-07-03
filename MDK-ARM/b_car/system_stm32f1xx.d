@@ -2,7 +2,7 @@ b_car\system_stm32f1xx.o: ../Core/Src/system_stm32f1xx.c
 b_car\system_stm32f1xx.o: ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h
 b_car\system_stm32f1xx.o: ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h
 b_car\system_stm32f1xx.o: ../Drivers/CMSIS/Include/core_cm3.h
-b_car\system_stm32f1xx.o: D:\keil\ARM\ARMCC\Bin\..\include\stdint.h
+b_car\system_stm32f1xx.o: D:\MyProgram\aworking\kz\keil\KeilV5\ARM\ARMCC\Bin\..\include\stdint.h
 b_car\system_stm32f1xx.o: ../Drivers/CMSIS/Include/cmsis_version.h
 b_car\system_stm32f1xx.o: ../Drivers/CMSIS/Include/cmsis_compiler.h
 b_car\system_stm32f1xx.o: ../Drivers/CMSIS/Include/cmsis_armcc.h
@@ -13,7 +13,7 @@ b_car\system_stm32f1xx.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc.
 b_car\system_stm32f1xx.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h
 b_car\system_stm32f1xx.o: ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h
 b_car\system_stm32f1xx.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
-b_car\system_stm32f1xx.o: D:\keil\ARM\ARMCC\Bin\..\include\stddef.h
+b_car\system_stm32f1xx.o: D:\MyProgram\aworking\kz\keil\KeilV5\ARM\ARMCC\Bin\..\include\stddef.h
 b_car\system_stm32f1xx.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc_ex.h
 b_car\system_stm32f1xx.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h
 b_car\system_stm32f1xx.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio_ex.h

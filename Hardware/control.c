@@ -2,15 +2,15 @@
 /************************
 直立环控制参数
 ************************/
-float Vertical_Kp=580;
-float Vertical_Kd=0.13;
+float Vertical_Kp=320;
+float Vertical_Kd=0.1;
 
 
 /*************************
 速度环控制参数
 *************************/
-float Velocity_Kp=0.262;
-float Velocity_Ki=0.262/200;
+float Velocity_Kp=1.2;
+float Velocity_Ki=1.2/200;
 
 
 /*************************
