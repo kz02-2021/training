@@ -34,6 +34,6 @@ b_car\main.o: ../Core/Inc/tim.h
 b_car\main.o: ../Core/Inc/usart.h
 b_car\main.o: ../Core/Inc/gpio.h
 b_car\main.o: D:\keil\ARM\ARMCC\Bin\..\include\stdio.h
-b_car\main.o: ..\..\MPU6050-master\Src\mpu6050.h
+b_car\main.o: ..\Hardware\Src\mpu6050.h
 b_car\main.o: ..\Hardware\control.h
 b_car\main.o: ..\Hardware\encoder.h
