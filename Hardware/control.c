@@ -2,22 +2,28 @@
 /************************
 直立环控制参数
 ************************/
-float Vertical_Kp=320;
-float Vertical_Kd=0.1;
+const float Vertical_Kp=200;
+const float Vertical_Kd=0.16;
 
+float Vertical_Kp_=800;
+float Vertical_Kd_=Vertical_Kd;
+
+float min_angle = 1;
 
 /*************************
 速度环控制参数
 *************************/
-float Velocity_Kp=1.2;
-float Velocity_Ki=1.2/200;
+
+const float Velocity_Kp=1.4;		//1.245
+float Velocity_Ki=Velocity_Kp/200;
+
 
 
 /*************************
 转向环控制参数
 **************************/
-float Turn_Kp=0;
-
+float Turn_Kp=-0.13;
+float Turn_Kp2=0;
 
 /*************************
 绝对值函数
@@ -56,19 +62,23 @@ int Vertical(float Med,float Angle,float gyro_Y)
 {
 	int PWM_out;	
 	PWM_out=Vertical_Kp*(Angle-Med)+Vertical_Kd*(gyro_Y-0);//【1】
+	if (Angle-Med > min_angle || Angle-Med < -min_angle){
+		if (Angle > 0) 	PWM_out = Vertical_Kp_*(Angle-Med)+Vertical_Kd_*(gyro_Y-0)-(Vertical_Kp_-Vertical_Kp)*(min_angle-Med);
+		else						PWM_out = Vertical_Kp_*(Angle-Med)+Vertical_Kd_*(gyro_Y-0)-(Vertical_Kp_-Vertical_Kp)*(-min_angle-Med);
+	}
 	return PWM_out;
 }
 
 /*********************
 速度环PI：Kp*Ek+Ki*Ek_S
 *********************/
-int Velocity(int encoder_left,int encoder_right)
+int Velocity(int target_speed,int encoder_left,int encoder_right)
 {
 	static int PWM_out,Encoder_Err,Encoder_S,EnC_Err_Lowout,EnC_Err_Lowout_last;//【2】
-	float a=0.6;//【3】
+	float a=0.8;//【3】
 	
 	//1.计算速度偏差
-	Encoder_Err=(encoder_left+encoder_right)-0;//舍去误差
+	Encoder_Err=(encoder_left+encoder_right)-target_speed ;//舍去误差
 	//2.对速度偏差进行低通滤波
 	EnC_Err_Lowout=(1-a)*Encoder_Err+a*EnC_Err_Lowout_last;//使得波形更加平滑，滤除高频干扰，防止速度突变。
 	EnC_Err_Lowout_last=EnC_Err_Lowout;//防止速度过大的影响直立环的正常工作。
@@ -86,10 +96,10 @@ int Velocity(int encoder_left,int encoder_right)
 /*********************
 转向环：系数*Z轴角速度
 *********************/
-int Turn(int gyro_Z)
+int Turn(int gyro_Z,int speed)
 {
 	int PWM_out;
 	
-	PWM_out=Turn_Kp*gyro_Z;
+	PWM_out=Turn_Kp*gyro_Z+Turn_Kp2;
 	return PWM_out;
 }

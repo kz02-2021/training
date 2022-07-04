@@ -38,8 +38,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define PWM_MAX 7200
-#define PWM_MIN -7200
+#define PWM_MAX 6000
+#define PWM_MIN -6000
 #define MedAngle -0.15
 MPU6050_t MPU6050;
 /* USER CODE END PD */
@@ -195,14 +195,14 @@ HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4  );}
 		else HAL_GPIO_WritePin (GPIOC ,GPIO_PIN_13 ,GPIO_PIN_SET );
 		
 		Vertical_out=Vertical(MedAngle,MPU6050 .KalmanAngleX,MPU6050 .Gyro_X_RAW);	//直立环计算
-		Velocity_out=Velocity(EncoderLeft,EncoderRight);							//速度环计算
-		Turn_out=Turn(MPU6050 .Gyro_Z_RAW);														  //转向环计算
+		Velocity_out=Velocity(0, EncoderLeft,EncoderRight);							//速度环计算
+		Turn_out=Turn(MPU6050 .Gyro_Z_RAW, 0);														  //转向环计算
 		PWM_out=Vertical_out-Vertical_Kp*Velocity_out;								//最终输出
-		Moto1=PWM_out-Turn_out+750;
-		Moto2=PWM_out+Turn_out+750;																				//计算最终输出
+		Moto1=PWM_out-Turn_out+780;
+		Moto2=PWM_out+Turn_out+780;																				//计算最终输出
 		Limit(&Moto1,&Moto2);
 		if(MPU6050 .KalmanAngleX >40||MPU6050 .KalmanAngleX <-40) {Moto1 =0;Moto2 =0;}		//PWM限幅
-		Load (Moto1 ,Moto2 );
+		Load (Moto1 ,Moto2  );
 		printf ("LEFT:%d\n",EncoderLeft );
 		printf ("RIGHT:%d\n",EncoderRight );
 		

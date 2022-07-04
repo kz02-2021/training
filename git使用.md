@@ -6,6 +6,10 @@
 
    ` Rm -rf .git `
 
+2. 克隆
+
+   `  git clone https://github.com/flutter/flutter.git --depth 1 `不复制整个历史版本（防止文件太大下载失败）
+
 
 ## 提交
 
