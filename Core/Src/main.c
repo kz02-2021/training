@@ -38,10 +38,11 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define PWM_MAX 6000
-#define PWM_MIN -6000
-#define MedAngle -0.15
+#define PWM_MAX 7200
+#define PWM_MIN -7200
+#define MedAngle -1.45
 MPU6050_t MPU6050;
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -52,12 +53,20 @@ MPU6050_t MPU6050;
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-int Moto1,Moto2,EncoderLeft,EncoderRight,Vertical_out,Velocity_out,Turn_out,PWM_out;
-extern float Vertical_Kp;
+		int Moto1,Moto2,EncoderLeft,EncoderRight,Vertical_out,Velocity_out,Turn_out,PWM_out;
+		extern float Vertical_Kp;
     float pitch,roll,yaw; 		    //欧拉角
     short aacx,aacy,aacz;			//加速度传感器原始数据
     short gyrox,gyroy,gyroz;		//陀螺仪原始数据
     float temp;				//温度
+		uint8_t RxBuffer[5]={0};
+		int target_speed=0;
+		int turn_speed=0;
+		int Forward=0;
+		int Back=0;
+		int Left=0 ;
+		int Right=0;
+		
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -114,7 +123,7 @@ HAL_TIM_Encoder_Start (&htim4 ,TIM_CHANNEL_ALL );
 
 		HAL_TIM_Base_Start_IT (&htim3 );
 HAL_GPIO_WritePin (GPIOA ,GPIO_PIN_5,GPIO_PIN_SET );
-
+HAL_UART_Receive_IT (&huart2,RxBuffer ,1);
    while (MPU6050_Init(&hi2c2) == 1);
   /* USER CODE END 2 */
 
@@ -126,7 +135,6 @@ HAL_GPIO_WritePin (GPIOA ,GPIO_PIN_5,GPIO_PIN_SET );
 
     /* USER CODE BEGIN 3 */
 
-		
 		
   }
   /* USER CODE END 3 */
@@ -190,28 +198,53 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		
 //	HAL_GPIO_TogglePin (GPIOC ,GPIO_PIN_13 );
 		MPU6050_Read_All(&hi2c2, &MPU6050);//得到陀螺仪数据
-			 if(MPU6050.KalmanAngleX ||MPU6050 .Gyro_X_RAW){HAL_GPIO_WritePin (GPIOC ,GPIO_PIN_13 ,GPIO_PIN_RESET );HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1  );
-HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4  );}
+		if(MPU6050.KalmanAngleX ||MPU6050 .Gyro_X_RAW){
+			HAL_GPIO_WritePin (GPIOC ,GPIO_PIN_13 ,GPIO_PIN_RESET );HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1  );
+			HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4  );}
 		else HAL_GPIO_WritePin (GPIOC ,GPIO_PIN_13 ,GPIO_PIN_SET );
 		
 		Vertical_out=Vertical(MedAngle,MPU6050 .KalmanAngleX,MPU6050 .Gyro_X_RAW);	//直立环计算
-		Velocity_out=Velocity(EncoderLeft,EncoderRight);							//速度环计算
-		Turn_out=Turn(MPU6050 .Gyro_Z_RAW);														  //转向环计算
-		PWM_out=Vertical_out-Vertical_Kp*Velocity_out;								//最终输出
-		Moto1=PWM_out-Turn_out+780;
-		Moto2=PWM_out+Turn_out+780;																				//计算最终输出
+		if(Forward ==1&&Back ==0&&Left ==0&&Right ==0)target_speed =8000;
+		else if(Forward ==0&&Back ==1&&Left ==0&&Right ==0)target_speed =-8000;
+		else if(Forward ==0&&Back ==0&&Left ==1&&Right ==0)turn_speed =5000;
+		else if(Forward ==0&&Back ==0&&Left ==0&&Right ==1)turn_speed =-5000;
+		if(Forward ==0&&Back ==0&&Left ==0&&Right ==0){target_speed =0;turn_speed =0;}
+		Velocity_out=Velocity(target_speed,EncoderLeft,EncoderRight);							//速度环计算
+		Turn_out=Turn(MPU6050 .Gyro_Z_RAW,turn_speed);														  //转向环计算
+		PWM_out=Vertical_out-Velocity_out;								//最终输出
+		Moto1=PWM_out-Turn_out;
+		Moto2=PWM_out+Turn_out;																				//计算最终输出
 		Limit(&Moto1,&Moto2);
-		if(MPU6050 .KalmanAngleX >40||MPU6050 .KalmanAngleX <-40) {Moto1 =0;Moto2 =0;}		//PWM限幅
-		Load (Moto1 ,Moto2  );
-		printf ("LEFT:%d\n",EncoderLeft );
-		printf ("RIGHT:%d\n",EncoderRight );
 		
+		if(MPU6050 .KalmanAngleX >50||MPU6050 .KalmanAngleX <-50) {Moto1 =0;Moto2 =0;}		//PWM限幅
+		Load (Moto1  ,Moto2   );
+
+		
+	}
+
+}
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	if(huart ->Instance ==USART2 )
+	{HAL_GPIO_TogglePin (GPIOC ,GPIO_PIN_13 );
+	switch (RxBuffer [0])
+	{
+		case '0': {Forward =0;Back =0;Left =0;Right =0;break;}
+		case '1':	{Forward =1;Back =0;Left =0;Right =0;break;}
+		case '2':	{Forward =0;Back =0;Left =1;Right =0;break;}
+		case '3': {Forward =0;Back =0;Left =0;Right =1;break;}
+		case '4': {Forward =0;Back =1;Left =0;Right =0;break;}
+		default :{	Forward =0;Back =0;Left =0;Right =0;break ;}
+	}
+	printf ("%c",RxBuffer [0]);
+	HAL_UART_Receive_IT (&huart2 ,RxBuffer ,1);
+
 	}
 
 }
 int fputc(int ch,FILE *f)
 {
-HAL_UART_Transmit (&huart2  ,(uint8_t *)&ch,1,HAL_MAX_DELAY );
+HAL_UART_Transmit (&huart1  ,(uint8_t *)&ch,1,HAL_MAX_DELAY );
 
 return ch;
 
