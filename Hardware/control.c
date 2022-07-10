@@ -2,11 +2,11 @@
 /************************
 直立环控制参数
 ************************/
-const float Vertical_Kp=200;
-const float Vertical_Kd=0.16;
+const float Vertical_Kp=300;
+const float Vertical_Kd=0.1;
 
 float Vertical_Kp_=800;
-float Vertical_Kd_=Vertical_Kd;
+float Vertical_Kd_=0.1;
 
 float min_angle = 1;
 
@@ -14,16 +14,16 @@ float min_angle = 1;
 速度环控制参数
 *************************/
 
-const float Velocity_Kp=1.4;		//1.245
-float Velocity_Ki=Velocity_Kp/200;
-
+const float Velocity_Kp=1.5;		//1.245
+float Velocity_Ki=0.01;
+int max_es = 10000000;
 
 
 /*************************
 转向环控制参数
 **************************/
-float Turn_Kp=-0.13;
-float Turn_Kp2=0;
+float Turn_Kp=0.13;
+float Turn_Ki=-10;
 
 /*************************
 绝对值函数
@@ -64,7 +64,7 @@ int Vertical(float Med,float Angle,float gyro_Y)
 	PWM_out=Vertical_Kp*(Angle-Med)+Vertical_Kd*(gyro_Y-0);//【1】
 	if (Angle-Med > min_angle || Angle-Med < -min_angle){
 		if (Angle > 0) 	PWM_out = Vertical_Kp_*(Angle-Med)+Vertical_Kd_*(gyro_Y-0)-(Vertical_Kp_-Vertical_Kp)*(min_angle-Med);
-		else						PWM_out = Vertical_Kp_*(Angle-Med)+Vertical_Kd_*(gyro_Y-0)-(Vertical_Kp_-Vertical_Kp)*(-min_angle-Med);
+		else			PWM_out = Vertical_Kp_*(Angle-Med)+Vertical_Kd_*(gyro_Y-0)-(Vertical_Kp_-Vertical_Kp)*(-min_angle-Med);
 	}
 	return PWM_out;
 }
@@ -83,9 +83,9 @@ int Velocity(int target_speed,int encoder_left,int encoder_right)
 	EnC_Err_Lowout=(1-a)*Encoder_Err+a*EnC_Err_Lowout_last;//使得波形更加平滑，滤除高频干扰，防止速度突变。
 	EnC_Err_Lowout_last=EnC_Err_Lowout;//防止速度过大的影响直立环的正常工作。
 	//3.对速度偏差积分，积分出位移
-	Encoder_S+=EnC_Err_Lowout;//【4】
 	//4.积分限幅
-	Encoder_S=Encoder_S>10000?10000:(Encoder_S<(-10000)?(-10000):Encoder_S);
+	Encoder_S+=EnC_Err_Lowout;
+	Encoder_S=Encoder_S>max_es?max_es:(Encoder_S<(-max_es)?(-max_es):Encoder_S);
 	//5.速度环控制输出计算
 	PWM_out=Velocity_Kp*EnC_Err_Lowout+Velocity_Ki*Encoder_S;//【5】
 	return PWM_out;
@@ -96,10 +96,12 @@ int Velocity(int target_speed,int encoder_left,int encoder_right)
 /*********************
 转向环：系数*Z轴角速度
 *********************/
-int Turn(int gyro_Z,int speed)
+int Turn(int speed, int encoder_loss)
 {
+	static int Encoder_S_loss;
 	int PWM_out;
-	
-	PWM_out=Turn_Kp*gyro_Z+Turn_Kp2;
+	Encoder_S_loss += encoder_loss;
+	PWM_out=Turn_Kp*speed + Encoder_S_loss*Turn_Ki;
 	return PWM_out;
 }
+

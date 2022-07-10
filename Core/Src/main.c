@@ -54,10 +54,15 @@ MPU6050_t MPU6050;
 /* USER CODE BEGIN PV */
 int Moto1,Moto2,EncoderLeft,EncoderRight,Vertical_out,Velocity_out,Turn_out,PWM_out;
 extern float Vertical_Kp;
-    float pitch,roll,yaw; 		    //欧拉角
-    short aacx,aacy,aacz;			//加速度传感器原始数据
-    short gyrox,gyroy,gyroz;		//陀螺仪原始数据
-    float temp;				//温度
+float pitch,roll,yaw; 		    //欧拉角
+short aacx,aacy,aacz;			//加速度传感器原始数据
+short gyrox,gyroy,gyroz;		//陀螺仪原始数据
+float temp;				//温度
+
+int distance_kp = 10000;
+int speed;
+int distance = 100000000;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -171,6 +176,11 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+float get_speed(int es_loss){
+	float ans = es_loss * distance_kp / 898 * 20;
+	return ans ? my_abs(ans)<10000 : 10000*ans/my_abs(ans);
+}
 /*限幅函数*/
 void Limit(int *motoA,int *motoB)
 {
@@ -194,12 +204,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4  );}
 		else HAL_GPIO_WritePin (GPIOC ,GPIO_PIN_13 ,GPIO_PIN_SET );
 		
+		if (distance > 0)
+				distance -= (EncoderLeft+EncoderRight)/2;
+		else 	distance += (EncoderLeft+EncoderRight)/2;
+		speed = get_speed(distance);
 		Vertical_out=Vertical(MedAngle,MPU6050 .KalmanAngleX,MPU6050 .Gyro_X_RAW);	//直立环计算
-		Velocity_out=Velocity(0, EncoderLeft,EncoderRight);							//速度环计算
-		Turn_out=Turn(MPU6050 .Gyro_Z_RAW, 0);														  //转向环计算
+		Velocity_out=Velocity(speed, EncoderLeft,EncoderRight);							//速度环计算
+		Turn_out=Turn(0, EncoderLeft - EncoderRight);														  //转向环计算
 		PWM_out=Vertical_out-Vertical_Kp*Velocity_out;								//最终输出
-		Moto1=PWM_out-Turn_out+780;
-		Moto2=PWM_out+Turn_out+780;																				//计算最终输出
+		Moto1=PWM_out-Turn_out;
+		Moto2=PWM_out+Turn_out;																				//计算最终输出
 		Limit(&Moto1,&Moto2);
 		if(MPU6050 .KalmanAngleX >40||MPU6050 .KalmanAngleX <-40) {Moto1 =0;Moto2 =0;}		//PWM限幅
 		Load (Moto1 ,Moto2  );

@@ -9,6 +9,6 @@ int my_abs(int i);
 void Load(int moto1,int moto2);
 int Vertical(float Med,float Angle,float gyro_Y);
 int Velocity(int target_speed,int encoder_left,int encoder_right);
-int Turn(int gyro_Z,int turn_speed);
+int Turn(int speed, int encoder_loss);
 
 #endif
