@@ -42,6 +42,7 @@
 #define PWM_MIN -6000
 #define MedAngle -0.15
 MPU6050_t MPU6050;
+#define speed_max 10000
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
