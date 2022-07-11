@@ -1,6 +1,6 @@
 # git使用
 
-## 仓库
+## 仓库初始化
 
 1. git取消init
 
@@ -15,7 +15,7 @@
 
 ## 版本回滚
 
-1. 撤销修改（已经commit）
+1. 撤销修改（已经commit）**主要用这个**
 
    ```
    git reset HEAD .
@@ -49,4 +49,5 @@ git reset --hard 55c49efab26d6a5c657d87e05b85……
 
 # 问题
 
-1. 怎么在已经有所有代码的文件中连接上指定git
+1. 查看当前位置 ` git remote -v`
+2. 
