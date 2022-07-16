@@ -1,7 +1,7 @@
 b_car\mpu6050.o: ..\Hardware\Src\mpu6050.c
-b_car\mpu6050.o: D:\MyProgram\aworking\kz\keil\KeilV5\ARM\ARMCC\Bin\..\include\math.h
+b_car\mpu6050.o: D:\keil\ARM\ARMCC\Bin\..\include\math.h
 b_car\mpu6050.o: ..\Hardware\Src\mpu6050.h
-b_car\mpu6050.o: D:\MyProgram\aworking\kz\keil\KeilV5\ARM\ARMCC\Bin\..\include\stdint.h
+b_car\mpu6050.o: D:\keil\ARM\ARMCC\Bin\..\include\stdint.h
 b_car\mpu6050.o: ../Core/Inc/i2c.h
 b_car\mpu6050.o: ../Core/Inc/main.h
 b_car\mpu6050.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h
@@ -17,7 +17,7 @@ b_car\mpu6050.o: ../Drivers/CMSIS/Include/cmsis_armcc.h
 b_car\mpu6050.o: ../Drivers/CMSIS/Device/ST/STM32F1xx/Include/system_stm32f1xx.h
 b_car\mpu6050.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal.h
 b_car\mpu6050.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h
-b_car\mpu6050.o: D:\MyProgram\aworking\kz\keil\KeilV5\ARM\ARMCC\Bin\..\include\stddef.h
+b_car\mpu6050.o: D:\keil\ARM\ARMCC\Bin\..\include\stddef.h
 b_car\mpu6050.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_rcc_ex.h
 b_car\mpu6050.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio.h
 b_car\mpu6050.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_gpio_ex.h

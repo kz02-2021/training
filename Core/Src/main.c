@@ -43,6 +43,7 @@
 #define MedAngle -0.15
 MPU6050_t MPU6050;
 #define speed_max 10000
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -59,11 +60,19 @@ float pitch,roll,yaw; 		    //欧拉角
 short aacx,aacy,aacz;			//加速度传感器原始数据
 short gyrox,gyroy,gyroz;		//陀螺仪原始数据
 float temp;				//温度
-
+		uint8_t RxBuffer[5]={0};
+		uint8_t RxBuffer1[5]={0};
 int distance_kp = 10000;
 int speed;
 int distance = 100000000;
-
+		float  target_speed=0;
+		int turn_speed=0;
+		int Forward=0;
+		int Back=0;
+		int Left=0 ;
+		int Right=0;
+		volatile int flag=1;
+		int dist=0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -177,11 +186,25 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
-float get_speed(int es_loss){
-	float ans = es_loss * distance_kp / 898 * 20;
-	return ans ? my_abs(ans)<10000 : 10000*ans/my_abs(ans);
+/*********************
+控制具体前进的位移
+以cm为单位！
+**********************/
+float   SetSpeed(int dist)
+{
+	static  int sum_count=0;
+	float speed,d_distance;
+	float real_distance;
+	if(flag ){
+	sum_count+=(EncoderLeft +EncoderRight) /2;
+	real_distance =sum_count /898.04*20.41;
+	d_distance =dist -real_distance ;
+	speed=d_distance*1000 ;
+	if(real_distance -dist <1&&real_distance -dist >-1)
+	{speed =0;flag=0;}}
+return speed ;
 }
+
 /*限幅函数*/
 void Limit(int *motoA,int *motoB)
 {
@@ -190,6 +213,12 @@ void Limit(int *motoA,int *motoB)
 	
 	if(*motoB>PWM_MAX)*motoB=PWM_MAX;
 	if(*motoB<PWM_MIN)*motoB=PWM_MIN;
+}
+void SpeedLimit(float *target_speed)
+{
+		if(*target_speed>speed_max )*target_speed =speed_max;
+		if(*target_speed<-speed_max)*target_speed =-speed_max;
+
 }
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -205,12 +234,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4  );}
 		else HAL_GPIO_WritePin (GPIOC ,GPIO_PIN_13 ,GPIO_PIN_SET );
 		
-		if (distance > 0)
-				distance -= (EncoderLeft+EncoderRight)/2;
-		else 	distance += (EncoderLeft+EncoderRight)/2;
-		speed = get_speed(distance);
+
 		Vertical_out=Vertical(MedAngle,MPU6050 .KalmanAngleX,MPU6050 .Gyro_X_RAW);	//直立环计算
-		Velocity_out=Velocity(speed, EncoderLeft,EncoderRight);							//速度环计算
+		if(Forward ==1&&Back ==0&&Left ==0&&Right ==0)target_speed =10000;
+		else if(Forward ==0&&Back ==1&&Left ==0&&Right ==0)target_speed =-10000;
+		else if(Forward ==0&&Back ==0&&Left ==1&&Right ==0)turn_speed =5000;
+		else if(Forward ==0&&Back ==0&&Left ==0&&Right ==1)turn_speed =-5000;
+		if(Forward ==0&&Back ==0&&Left ==0&&Right ==0){target_speed =0;turn_speed =0;}
+		if(flag )
+		target_speed = SetSpeed  (dist);
+		else  target_speed =0;
+		SpeedLimit (&target_speed );
+		Velocity_out=Velocity(target_speed, EncoderLeft,EncoderRight);							//速度环计算
 		Turn_out=Turn(0, EncoderLeft - EncoderRight);														  //转向环计算
 		PWM_out=Vertical_out-Vertical_Kp*Velocity_out;								//最终输出
 		Moto1=PWM_out-Turn_out;
@@ -218,8 +253,7 @@ HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4  );}
 		Limit(&Moto1,&Moto2);
 		if(MPU6050 .KalmanAngleX >40||MPU6050 .KalmanAngleX <-40) {Moto1 =0;Moto2 =0;}		//PWM限幅
 		Load (Moto1 ,Moto2  );
-		printf ("LEFT:%d\n",EncoderLeft );
-		printf ("RIGHT:%d\n",EncoderRight );
+
 		
 	}
 
@@ -230,6 +264,34 @@ HAL_UART_Transmit (&huart2  ,(uint8_t *)&ch,1,HAL_MAX_DELAY );
 
 return ch;
 
+}
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	if(huart ==&huart2 )
+	{	
+
+		switch (RxBuffer [0])
+		{
+			case '0': {Forward =0;Back =0;Left =0;Right =0;break;}
+			case '1':	{Forward =1;Back =0;Left =0;Right =0;break;}
+			case '2':	{Forward =0;Back =0;Left =1;Right =0;break;}
+			case '3': {Forward =0;Back =0;Left =0;Right =1;break;}
+			case '4': {Forward =0;Back =1;Left =0;Right =0;break;}
+			default :{	Forward =0;Back =0;Left =0;Right =0;break ;}
+		}
+		if ((float)RxBuffer1[0]>1000)
+		{
+			HAL_GPIO_TogglePin (GPIOC ,GPIO_PIN_13 );
+			Vertical_Kp = ((float)RxBuffer1[0]-1000)* 100;
+			
+		}
+		HAL_UART_Receive_IT (&huart2 ,RxBuffer ,1);
+	
+		
+		
+		
+	}
+	
 }
 /* USER CODE END 4 */
 

@@ -16,14 +16,14 @@ float min_angle = 1;
 
 const float Velocity_Kp=1.5;		//1.245
 float Velocity_Ki=0.01;
-int max_es = 10000000;
+int max_es = 30;
 
 
 /*************************
 转向环控制参数
 **************************/
 float Turn_Kp=0.13;
-float Turn_Ki=-10;
+float Turn_Ki=-50;
 
 /*************************
 绝对值函数
@@ -78,7 +78,7 @@ int Velocity(int target_speed,int encoder_left,int encoder_right)
 	float a=0.8;//【3】
 	
 	//1.计算速度偏差
-	Encoder_Err=(encoder_left+encoder_right)-target_speed ;//舍去误差
+	Encoder_Err=(encoder_left+encoder_right)-target_speed/2000 ;//舍去误差
 	//2.对速度偏差进行低通滤波
 	EnC_Err_Lowout=(1-a)*Encoder_Err+a*EnC_Err_Lowout_last;//使得波形更加平滑，滤除高频干扰，防止速度突变。
 	EnC_Err_Lowout_last=EnC_Err_Lowout;//防止速度过大的影响直立环的正常工作。
@@ -101,7 +101,9 @@ int Turn(int speed, int encoder_loss)
 	static int Encoder_S_loss;
 	int PWM_out;
 	Encoder_S_loss += encoder_loss;
+	Encoder_S_loss=Encoder_S_loss>max_es?max_es:(Encoder_S_loss<(-max_es)?(-max_es):Encoder_S_loss);
 	PWM_out=Turn_Kp*speed + Encoder_S_loss*Turn_Ki;
+
 	return PWM_out;
 }
 
