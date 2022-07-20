@@ -2,6 +2,7 @@
 "b_car\startup_stm32f103xb.o"
 "b_car\main.o"
 "b_car\gpio.o"
+"b_car\dma.o"
 "b_car\i2c.o"
 "b_car\tim.o"
 "b_car\usart.o"
@@ -26,6 +27,7 @@
 "b_car\encoder.o"
 "b_car\control.o"
 "b_car\mpu6050.o"
+"b_car\json.o"
 "b_car\retarget_io.o"
 --library_type=microlib --strict --scatter "b_car\b_car.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols

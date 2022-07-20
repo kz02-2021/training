@@ -1,6 +1,6 @@
-b_car\mpu6050.o: ..\..\MPU6050-master\Src\mpu6050.c
+b_car\mpu6050.o: ..\Hardware\Src\mpu6050.c
 b_car\mpu6050.o: D:\keil\ARM\ARMCC\Bin\..\include\math.h
-b_car\mpu6050.o: ..\..\MPU6050-master\Src\mpu6050.h
+b_car\mpu6050.o: ..\Hardware\Src\mpu6050.h
 b_car\mpu6050.o: D:\keil\ARM\ARMCC\Bin\..\include\stdint.h
 b_car\mpu6050.o: ../Core/Inc/i2c.h
 b_car\mpu6050.o: ../Core/Inc/main.h

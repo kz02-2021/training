@@ -29,6 +29,7 @@ b_car\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pwr.h
 b_car\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim.h
 b_car\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_tim_ex.h
 b_car\main.o: ../Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_uart.h
+b_car\main.o: ../Core/Inc/dma.h
 b_car\main.o: ../Core/Inc/i2c.h
 b_car\main.o: ../Core/Inc/tim.h
 b_car\main.o: ../Core/Inc/usart.h
@@ -37,3 +38,4 @@ b_car\main.o: D:\keil\ARM\ARMCC\Bin\..\include\stdio.h
 b_car\main.o: ..\Hardware\Src\mpu6050.h
 b_car\main.o: ..\Hardware\control.h
 b_car\main.o: ..\Hardware\encoder.h
+b_car\main.o: ..\Hardware\JSON\JSON.h
